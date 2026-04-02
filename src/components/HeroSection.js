@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -33,6 +34,8 @@ export default function HeroSection() {
   useEffect(() => {
     if (!carRef.current || lettersRef.current.length === 0) return;
 
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
 
       const carEl   = carRef.current;
@@ -45,7 +48,7 @@ export default function HeroSection() {
       // ── Initial states ─────────────────────────────────────────
       gsap.set(carEl, { x: startX });
       gsap.set(lettersRef.current, { opacity: 0, y: 24 });
-      gsap.set(statsRef.current,   { opacity: 0, y: 30 });  // all 4 stats hidden
+      gsap.set(statsRef.current,   { opacity: 0, y: 30 });
 
       // ── Master scroll timeline (pinned) ───────────────────────
       const tl = gsap.timeline({
@@ -66,7 +69,7 @@ export default function HeroSection() {
         duration: 3,
       }, 0);
 
-      // 2. Letters: reveal one-by-one (starts slightly after car moves)
+      // 2. Letters: reveal one-by-one
       tl.to(
         lettersRef.current,
         {
@@ -79,7 +82,7 @@ export default function HeroSection() {
         0.45,
       );
 
-      // 3. Stats: reveal one-by-one after letters start appearing
+      // 3. Stats: reveal one-by-one after letters
       tl.to(
         statsRef.current,
         {
@@ -108,6 +111,7 @@ export default function HeroSection() {
         style={{
           height: '100vh',
           width: '100vw',
+          maxWidth: '100%',
           overflow: 'hidden',
           position: 'relative',
           background: 'var(--bg-primary)',
@@ -151,7 +155,8 @@ export default function HeroSection() {
             position: 'absolute',
             inset: 0,
             paddingTop: '72px',
-            paddingBottom: '88px',
+            // On mobile stats are 2x2 grid so taller — give more bottom padding
+            paddingBottom: 'clamp(100px, 20vw, 88px)',
             overflow: 'hidden',
           }}
         >
@@ -161,7 +166,7 @@ export default function HeroSection() {
             style={{
               position: 'absolute',
               top: '88px',
-              left: '2rem',
+              left: '1rem',
               fontSize: '0.6rem',
               letterSpacing: '0.25em',
               color: 'var(--text-muted)',
@@ -183,7 +188,8 @@ export default function HeroSection() {
               top: '50%',
               left: 0,
               transform: 'translateY(-50%)',
-              width: 'clamp(300px, 50vw, 720px)',
+              // Smaller on mobile so it doesn't overflow
+              width: 'clamp(200px, 80vw, 720px)',
               objectFit: 'contain',
               willChange: 'transform',
               filter: 'drop-shadow(0 0 50px rgba(232,255,71,0.14))',
@@ -192,13 +198,13 @@ export default function HeroSection() {
             }}
           />
 
-          {/* Decorative circle */}
+          {/* Decorative circle — hidden on small screens */}
           <div
             aria-hidden
             style={{
               position: 'absolute',
-              width: 'clamp(240px, 38vw, 540px)',
-              height: 'clamp(240px, 38vw, 540px)',
+              width: 'clamp(180px, 38vw, 540px)',
+              height: 'clamp(180px, 38vw, 540px)',
               border: '1px solid var(--border)',
               borderRadius: '50%',
               top: '50%',
@@ -222,18 +228,22 @@ export default function HeroSection() {
               alignItems: 'center',
               zIndex: 3,
               pointerEvents: 'none',
+              padding: '0 1rem',
             }}
           >
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'nowrap',
+                flexWrap: 'wrap',        // wrap on mobile so letters don't overflow
+                justifyContent: 'center',
                 fontFamily: 'var(--font-display)',
                 fontWeight: 800,
-                fontSize: 'clamp(2rem, 5.5vw, 5rem)',
-                lineHeight: 1,
+                // Smaller floor on mobile: 1.4rem min instead of 2rem
+                fontSize: 'clamp(1.4rem, 5.5vw, 5rem)',
+                lineHeight: 1.2,
                 color: 'var(--text-primary)',
                 letterSpacing: '0.2em',
+                maxWidth: '100%',
               }}
             >
               {HEADLINE_CHARS.map(({ id, char, isSpace }) => (
@@ -243,7 +253,7 @@ export default function HeroSection() {
                   style={{
                     display: 'inline-block',
                     whiteSpace: 'pre',
-                    minWidth: isSpace ? '0.5em' : 'auto',
+                    minWidth: isSpace ? '0.4em' : 'auto',
                   }}
                 >
                   {char}
@@ -252,7 +262,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* ── Right labels ─────────────────────────────────── */}
+          {/* ── Right labels — desktop only ──────────────────── */}
           <div
             className="d-none d-lg-flex flex-column justify-content-between"
             style={{
@@ -315,34 +325,38 @@ export default function HeroSection() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
+              // 2 columns on mobile, 4 on desktop
+              gridTemplateColumns: 'repeat(2, 1fr)',
               width: '100%',
             }}
+            className="stats-grid"
           >
             {STATS.map((stat, i) => (
               <div
                 key={i}
                 ref={(el) => (statsRef.current[i] = el)}
                 style={{
-                  padding: '1.2rem 1.8rem',
-                  borderRight: i < 3 ? '1px solid var(--border)' : 'none',
+                  padding: 'clamp(0.6rem, 2vw, 1.2rem) clamp(0.8rem, 2.5vw, 1.8rem)',
+                  // Border logic: right border except last in each row
+                  borderRight: i % 2 === 0 ? '1px solid var(--border)' : 'none',
+                  borderBottom: i < 2 ? '1px solid var(--border)' : 'none',
                 }}
               >
                 <div
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(1.4rem, 2.8vw, 2rem)',
+                    fontSize: 'clamp(1.1rem, 3.5vw, 2rem)',
                     fontWeight: 800,
                     color: 'var(--accent)',
                     lineHeight: 1,
-                    marginBottom: '0.3rem',
+                    marginBottom: '0.25rem',
                   }}
                 >
                   {stat.value}
                 </div>
                 <div
                   style={{
-                    fontSize: '0.7rem',
+                    fontSize: 'clamp(0.6rem, 1.5vw, 0.7rem)',
                     color: 'var(--text-muted)',
                     letterSpacing: '0.04em',
                     lineHeight: 1.4,
@@ -355,13 +369,14 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* ── Scroll Indicator ─────────────────────────────────── */}
+        {/* ── Scroll Indicator — hidden on mobile ──────────────── */}
+       {/* ── Scroll Indicator — hidden on mobile ──────────────── */}
         <div
+          className="d-none d-md-flex"
           style={{
             position: 'absolute',
-            bottom: '6.5rem',
-            right: '2.5rem',
-            display: 'flex',
+            bottom: '8rem',      // pushed up more so it clears the stats bar
+            right: '1.5rem',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '0.5rem',

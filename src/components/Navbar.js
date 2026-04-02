@@ -3,10 +3,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
-/**
- * Navbar
- * Minimal fixed navigation. Animates in on mount.
- */
 export default function Navbar() {
   const navRef = useRef(null);
 
