@@ -105,8 +105,9 @@ Page Load
   ├── Headline letters stagger up (GSAP, delay 0.5s, stagger 0.04s)
   └── Stats fade up (GSAP, delay 1.2s, stagger 0.12s)
 
-On Scroll (scrub: 1.2)
+On Scroll (scrub: 1.8)
   ├── Hero panel PINNED by ScrollTrigger for 300vh scroll distance
-  ├── Car translates X → -42vw (moves left across screen)
-  └── Headline letters drift slightly upward (-30px)
+  ├── Car starts at leftmost edge, moves RIGHT across screen
+  ├── Headline letters W E L C O M E I T Z F I Z Z reveal one by one
+  └── Stats (58%, 23%, 27%, 40%) reveal one by one after letters
 ```
